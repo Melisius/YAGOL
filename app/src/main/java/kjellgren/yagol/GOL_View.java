@@ -47,6 +47,7 @@ public class GOL_View extends SurfaceView implements Runnable {
             } catch (InterruptedException e) {
             }
             time_counter = time_counter + 100;
+            // TODO: Make method to only draw singular cell so this only need to be drawn after every evolve_Grid()
             Canvas canvas = getHolder().lockCanvas();
             // Update time from touch have to be different from update time
             // from evolve_Grid()
@@ -155,6 +156,10 @@ public class GOL_View extends SurfaceView implements Runnable {
             int j = (int) (event.getY() / rowHeight);
             if(grid[i][j] == 1) {grid[i][j] = 0;}
             else{grid[i][j] = 1;}
+            // Need to set grid2 also, else it will just disappear if doing evolve_Grid()
+            if(grid2[i][j] == 1) {grid2[i][j] = 0;}
+            else{grid2[i][j] = 1;}
+            // TODO: Make a method that only redraws this singular cell from thouch. Remmeber to check for memory leak afterwards
             invalidate();
         }
         return super.onTouchEvent(event);
