@@ -16,14 +16,14 @@ public class GOL_View extends SurfaceView implements Runnable {
     public static final int DEFAULT_CELL_SIZE = 50;
     public static final int DEFAULT_UPDATE_CANVAS = 100;
     public static final int DEFAULT_UPDATE_GRID = 1000;
-    public static final int DEFAULT_ALIVE_COLOR = Color.WHITE;
+    public static final int DEFAULT_ALIVE_COLOR = Color.GREEN;
     public static final int DEFAULT_DEAD_COLOR = Color.BLACK;
     // Thread for updating of Grid
     private Thread thread;
     // Boolean indicating if the app is not running
     private boolean is_running = false;
     private byte[][] grid, grid2;
-    private int columnWidth, rowHeight, nbColumns, nbRows;
+    private int columnWidth, rowHeight, nbColumns, nbRows, count;
     private int time_counter = 0;
     private int next_update_time = 0;
     // Utilitaries objects : a Rectangle instance and a Paint instance used to draw the elements
@@ -51,6 +51,7 @@ public class GOL_View extends SurfaceView implements Runnable {
             // Update time from touch have to be different from update time
             // from evolve_Grid()
             if (time_counter > next_update_time){
+                evolve_Grid();
                 next_update_time = next_update_time + DEFAULT_UPDATE_GRID;
             }
 
@@ -97,18 +98,50 @@ public class GOL_View extends SurfaceView implements Runnable {
     }
 
     private void evolve_Grid() {
+        for (int i = 0; i < nbColumns; i++) {
+            for (int j = 0; j < nbRows; j++) {
+                count = 0;
+                if (i != 0) {count += grid[i-1][j];}
+                if (i != nbColumns-1) {count += grid[i+1][j];}
+                if (j != 0) {count += grid[i][j-1];}
+                if (j != nbRows-1) {count += grid[i][j+1];}
+                if (i != 0 & j != 0 ) {count += grid[i-1][j-1];}
+                if (i != 0 & j != nbRows-1 ) {count += grid[i-1][j+1];}
+                if (i != nbColumns-1 & j != 0 ) {count += grid[i+1][j-1];}
+                if (i != nbColumns-1 & j != nbRows-1 ) {count += grid[i+1][j+1];}
 
+                if (grid[i][j] == 1 & count < 2){grid2[i][j] = 0;}
+                else if (grid[i][j] == 1 & count > 3){grid2[i][j] = 0;}
+                else if (grid[i][j] == 1 & count == 2){grid2[i][j] = 1;}
+                else if (grid[i][j] == 0 & count == 3){grid2[i][j] = 1;}
+            }
+        }
+        for (int i = 0; i < nbColumns; i++) {
+            for (int j = 0; j < nbRows; j++) {
+                grid[i][j] = grid2[i][j];
+            }
+        }
     }
 
     private void draw_Grid(Canvas canvas) {
         for (int i = 0; i < nbColumns; i++) {
             for (int j = 0; j < nbRows; j++) {
                 r.set((i * columnWidth) - 1, (j * rowHeight) - 1,
-                        (i * columnWidth + columnWidth) - 1,
-                        (j * rowHeight + rowHeight) - 1);
+                        (int)(i * columnWidth + columnWidth*0.9) - 1,
+                        (int) (j * rowHeight + rowHeight*0.9) - 1);
                 // we change the color according the alive status of the cell
-                if(grid[i][j] == 1) {p.setColor(DEFAULT_ALIVE_COLOR);}
-                else{p.setColor(DEFAULT_DEAD_COLOR);}
+                if(grid[i][j] == 1) {
+                    p.setColor(DEFAULT_ALIVE_COLOR);
+                    r.set((i * columnWidth) - 1, (j * rowHeight) - 1,
+                            (int)(i * columnWidth + columnWidth*0.9) - 1,
+                            (int) (j * rowHeight + rowHeight*0.9) - 1);
+                }
+                else{
+                    p.setColor(DEFAULT_DEAD_COLOR);
+                    r.set((i * columnWidth) - 1, (j * rowHeight) - 1,
+                            (i * columnWidth + columnWidth) - 1,
+                            (j * rowHeight + rowHeight) - 1);
+                }
                 canvas.drawRect(r, p);
             }
         }
